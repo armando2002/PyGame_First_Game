@@ -14,7 +14,7 @@ WHITE = (255, 255, 255)
 FPS = 60
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
 
-# import images for spaceships using OS
+# import images for spaceships using OS library
 YELLOW_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_yellow.png'))
 # resize image to be smaller
 YELLOW_SPACESHIP_IMAGE = pygame.transform.scale(YELLOW_SPACESHIP_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
