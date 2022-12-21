@@ -183,6 +183,7 @@ def main():
                 run = False
                 # quit the game
                 pygame.quit()
+                exit()
             # if key is pressed down
             if event.type == pygame.KEYDOWN:
                 # if Left Control is pressed, also check for max bullets on screen
