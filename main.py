@@ -217,6 +217,8 @@ def main():
         # refresh the screen each loop & pass ship rectangles & bullets
         draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health)
 
+    main()
+
 
 if __name__ == "__main__":
     main()
