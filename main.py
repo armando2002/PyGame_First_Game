@@ -1,3 +1,7 @@
+# NEED to do:
+# 1. Refactor into cleaner code with separate .py files for various related functions
+# 2. Add custom ship sprites
+
 import pygame
 import os
 
@@ -11,15 +15,27 @@ pygame.display.set_caption("First Game")
 WHITE = (255, 255, 255)
 # define border color
 BLACK = (0, 0, 0)
+# set red color
+RED = (255, 0, 0)
+# set yellow color
+YELLOW = (255, 255, 0)
 # set a border in the middle of the screen to keep ships apart (use known width and height)
-BORDER = pygame.Rect(WIDTH/2 - 10, 0, 10, HEIGHT)
+BORDER = pygame.Rect(WIDTH // 2 - 10, 0, 10, HEIGHT)
 
 # define FPS constant
 FPS = 60
 # set velocity constant for ship movement
 VEL = 5
+# set velocity constant for bullets
+BULLET_VEL = 7
+# set max # of bullets on screen (3)
+MAX_BULLETS = 2
 # set spaceship height and width constants
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 55, 40
+
+# add unique event for each bullet collision
+YELLOW_HIT = pygame.USEREVENT + 1
+RED_HIT = pygame.USEREVENT + 2
 
 # import images for spaceships using OS library
 YELLOW_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_yellow.png'))
@@ -31,7 +47,7 @@ RED_SPACESHIP_IMAGE = pygame.transform.rotate(pygame.transform.scale(RED_SPACESH
                                                                      (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
 
 
-def draw_window(red, yellow):
+def draw_window(red, yellow, red_bullets, yellow_bullets):
     # give white background
     WIN.fill(WHITE)
     # draw middle black border on window (window, color, border)
@@ -39,6 +55,16 @@ def draw_window(red, yellow):
     # draw images (use values from red and yellow rectangles from main())
     WIN.blit(YELLOW_SPACESHIP_IMAGE, (yellow.x, yellow.y))
     WIN.blit(RED_SPACESHIP_IMAGE, (red.x, red.y))
+
+    # draw red bullet
+    for bullet in red_bullets:
+        pygame.draw.rect(WIN, RED, bullet)
+
+    # draw yellow bullet
+    for bullet in yellow_bullets:
+        pygame.draw.rect(WIN, YELLOW, bullet)
+
+    # update the screen
     pygame.display.update()
 
 
@@ -58,7 +84,7 @@ def yellow_ship_movement(keys_pressed, yellow):
     if keys_pressed[pygame.K_s] and yellow.y + VEL + yellow.height < HEIGHT:
         yellow.y += VEL
 
-
+# controls red ship movement
 def red_ship_movement(keys_pressed, red):
     if keys_pressed[pygame.K_LEFT] and red.x - VEL > BORDER.x + BORDER.width:  # 2p left
         red.x -= VEL
@@ -70,10 +96,34 @@ def red_ship_movement(keys_pressed, red):
         red.y += VEL
 
 
+# move the bullets, handle collision, and remove bullets
+def handle_bullets(yellow_bullets, red_bullets, yellow, red):
+    for bullet in yellow_bullets:
+        # move the yellow bullet left
+        bullet.x += BULLET_VEL
+        # if ship collides with bullet
+        if red.colliderect(bullet):
+            # cause RED_HIT event when yellow bullet hits red ship
+            pygame.event.post(pygame.event.Event(RED_HIT))
+            yellow_bullets.remove(bullet)
+    for bullet in red_bullets:
+        # move the red bullet right
+        bullet.x -= BULLET_VEL
+        # if ship collides with bullet
+        if yellow.colliderect(bullet):
+            # cause YELLOW_HIT event when red bullet hits yellow ship
+            pygame.event.post(pygame.event.Event(YELLOW_HIT))
+            red_bullets.remove(bullet)
+
+
 def main():
     # define rectangles for spaceships
     red = pygame.Rect(700, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
     yellow = pygame.Rect(100, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
+
+    # define bullets
+    red_bullets = []
+    yellow_bullets = []
 
     # controls speed of while loop at 60 FPS
     clock = pygame.time.Clock()
@@ -86,13 +136,29 @@ def main():
             # if user quits
             if event.type == pygame.QUIT:
                 run = False
+            # if key is pressed down
+            if event.type == pygame.KEYDOWN:
+                # if Left Control is pressed, also check for max bullets on screen
+                if event.key == pygame.K_LCTRL and len(yellow_bullets) <= MAX_BULLETS:
+                    # make a rectangle for the bullet (add width to spawn in middle), use integer division
+                    bullet = pygame.Rect(yellow.x + yellow.width, yellow.y + yellow.height // 2 - 2, 10, 5)
+                    yellow_bullets.append(bullet)
+                # if Right Control is pressed
+                if event.key == pygame.K_RCTRL and len(red_bullets) <= MAX_BULLETS:
+                    # spawn bullet at left position (x default since spawn is upper left)
+                    bullet = pygame.Rect(red.x, red.y + red.height // 2 - 2, 10, 5)
+                    red_bullets.append(bullet)
+        print(red_bullets, yellow_bullets)
         # determine which keys are being pressed down
         keys_pressed = pygame.key.get_pressed()
         # use the ship movement functions to move
         yellow_ship_movement(keys_pressed, yellow)
         red_ship_movement(keys_pressed, red)
-        # refresh the screen each loop & pass ship rectangles
-        draw_window(red, yellow)
+        # deal with the bullets
+        handle_bullets(yellow_bullets, red_bullets, yellow, red)
+
+        # refresh the screen each loop & pass ship rectangles & bullets
+        draw_window(red, yellow, red_bullets, yellow_bullets)
 
     # quit the game
     pygame.quit()
