@@ -7,6 +7,8 @@ import os
 
 # set fonts for  score
 pygame.font.init()
+# adds sounds
+pygame.mixer.init()
 
 # sets window height and width constants
 WIDTH, HEIGHT = 900, 500
@@ -24,6 +26,10 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 # set a border in the middle of the screen to keep ships apart (use known width and height)
 BORDER = pygame.Rect(WIDTH // 2 - 10, 0, 10, HEIGHT)
+# bullet hit sound effect
+BULLET_HIT_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'Grenade+1.mp3'))
+# bullet fire sound
+BULLET_FIRE_SOUND= pygame.mixer.Sound(os.path.join('Assets', 'Gun+Silencer.mp3'))
 
 # set health font
 HEALTH_FONT = pygame.font.SysFont('Arial', 40)
@@ -184,6 +190,7 @@ def main():
                     # make a rectangle for the bullet (add width to spawn in middle), use integer division
                     bullet = pygame.Rect(yellow.x + yellow.width, yellow.y + yellow.height // 2 - 2, 10, 5)
                     yellow_bullets.append(bullet)
+                    BULLET_FIRE_SOUND.play()
                 # if Right Control is pressed
                 if event.key == pygame.K_RCTRL and len(red_bullets) <= MAX_BULLETS:
                     # spawn bullet at left position (x default since spawn is upper left)
@@ -192,9 +199,11 @@ def main():
             # if red hit, remove health
             if event.type == RED_HIT:
                 red_health -= 1
+                BULLET_HIT_SOUND.play()
             # if yellow hit, remove health
             if event.type == YELLOW_HIT:
                 yellow_health -= 1
+                BULLET_HIT_SOUND.play()
         # set winning text and show if health is 0
         winner_text = ""
         if red_health <= 0:
