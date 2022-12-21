@@ -42,14 +42,18 @@ YELLOW_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_yel
 # resize image to be smaller & rotate
 YELLOW_SPACESHIP_IMAGE = pygame.transform.rotate(pygame.transform.scale(YELLOW_SPACESHIP_IMAGE,
                                                                         (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 90)
+# same for red
 RED_SPACESHIP_IMAGE = pygame.image.load(os.path.join('Assets', 'spaceship_red.png'))
 RED_SPACESHIP_IMAGE = pygame.transform.rotate(pygame.transform.scale(RED_SPACESHIP_IMAGE,
                                                                      (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 270)
+# load background and make same width height as window
+SPACE = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'space.png')), (WIDTH, HEIGHT))
 
 
+# function for drawing background, ships, bullets
 def draw_window(red, yellow, red_bullets, yellow_bullets):
-    # give white background
-    WIN.fill(WHITE)
+    # give space background
+    WIN.blit(SPACE, (0, 0))
     # draw middle black border on window (window, color, border)
     pygame.draw.rect(WIN, BLACK, BORDER)
     # draw images (use values from red and yellow rectangles from main())
@@ -84,6 +88,7 @@ def yellow_ship_movement(keys_pressed, yellow):
     if keys_pressed[pygame.K_s] and yellow.y + VEL + yellow.height < HEIGHT:
         yellow.y += VEL
 
+
 # controls red ship movement
 def red_ship_movement(keys_pressed, red):
     if keys_pressed[pygame.K_LEFT] and red.x - VEL > BORDER.x + BORDER.width:  # 2p left
@@ -106,6 +111,9 @@ def handle_bullets(yellow_bullets, red_bullets, yellow, red):
             # cause RED_HIT event when yellow bullet hits red ship
             pygame.event.post(pygame.event.Event(RED_HIT))
             yellow_bullets.remove(bullet)
+        # if yellow bullet reaches end of screen, remove
+        elif bullet.x > WIDTH:
+            yellow_bullets.remove(bullet)
     for bullet in red_bullets:
         # move the red bullet right
         bullet.x -= BULLET_VEL
@@ -113,6 +121,9 @@ def handle_bullets(yellow_bullets, red_bullets, yellow, red):
         if yellow.colliderect(bullet):
             # cause YELLOW_HIT event when red bullet hits yellow ship
             pygame.event.post(pygame.event.Event(YELLOW_HIT))
+            red_bullets.remove(bullet)
+        # if red bullet reaches end of screen, remove
+        elif bullet.x < 0:
             red_bullets.remove(bullet)
 
 
