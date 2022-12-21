@@ -36,6 +36,31 @@ def draw_window(red, yellow):
     pygame.display.update()
 
 
+# controls yellow ship movement
+def yellow_ship_movement(keys_pressed, yellow):
+    # if key is pressed, do something (WASD for 1P and arrows for 2P)
+    if keys_pressed[pygame.K_a]:  # 1p left
+        yellow.x -= VEL
+    if keys_pressed[pygame.K_d]:  # right
+        yellow.x += VEL
+    if keys_pressed[pygame.K_w]:  # up
+        yellow.y -= VEL
+    if keys_pressed[pygame.K_s]:  # down
+        yellow.y += VEL
+
+
+def red_ship_movement(keys_pressed, red):
+    # if key is pressed, do something (WASD for 1P and arrows for 2P)
+    if keys_pressed[pygame.K_LEFT]:  # 2p left
+        red.x -= VEL
+    if keys_pressed[pygame.K_RIGHT]:  # right
+        red.x += VEL
+    if keys_pressed[pygame.K_UP]:  # up
+        red.y -= VEL
+    if keys_pressed[pygame.K_DOWN]:  # down
+        red.y += VEL
+
+
 def main():
     # define rectangles for spaceships
     red = pygame.Rect(700, 300, SPACESHIP_WIDTH, SPACESHIP_HEIGHT)
@@ -54,9 +79,9 @@ def main():
                 run = False
         # determine which keys are being pressed down
         keys_pressed = pygame.key.get_pressed()
-        # if key is pressed, do something (WASD for 1P and arrows for 2P)
-        if keys_pressed[pygame.K_a]:  # left
-            yellow.x -= VEL
+        # use the ship movement functions to move
+        yellow_ship_movement(keys_pressed, yellow)
+        red_ship_movement(keys_pressed, red)
         # refresh the screen each loop & pass ship rectangles
         draw_window(red, yellow)
 
