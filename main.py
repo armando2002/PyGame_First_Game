@@ -5,6 +5,9 @@
 import pygame
 import os
 
+# set fonts for  score
+pygame.font.init()
+
 # sets window height and width constants
 WIDTH, HEIGHT = 900, 500
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -21,6 +24,9 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 # set a border in the middle of the screen to keep ships apart (use known width and height)
 BORDER = pygame.Rect(WIDTH // 2 - 10, 0, 10, HEIGHT)
+
+# set health font
+HEALTH_FONT = pygame.font.SysFont('Arial', 40)
 
 # define FPS constant
 FPS = 60
@@ -51,11 +57,18 @@ SPACE = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'space.p
 
 
 # function for drawing background, ships, bullets
-def draw_window(red, yellow, red_bullets, yellow_bullets):
+def draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health):
     # give space background
     WIN.blit(SPACE, (0, 0))
     # draw middle black border on window (window, color, border)
     pygame.draw.rect(WIN, BLACK, BORDER)
+    # show health (1 = anti-aliasing) with white color
+    red_health_text = HEALTH_FONT.render("Health: " + str(red_health), 1, WHITE)
+    yellow_health_text = HEALTH_FONT.render("Health: " + str(yellow_health), 1, WHITE)
+    # get width of red text and subtract from top left of screen, add 10 px padding and put 10 px down from top
+    WIN.blit(red_health_text, (WIDTH - red_health_text.get_width() - 10, 10))
+    # put yellow health 10 px from left of window (0)
+    WIN.blit(yellow_health_text, (10, 10))
     # draw images (use values from red and yellow rectangles from main())
     WIN.blit(YELLOW_SPACESHIP_IMAGE, (yellow.x, yellow.y))
     WIN.blit(RED_SPACESHIP_IMAGE, (red.x, red.y))
@@ -136,6 +149,10 @@ def main():
     red_bullets = []
     yellow_bullets = []
 
+    # set health of ships
+    red_health = 10
+    yellow_health = 10
+
     # controls speed of while loop at 60 FPS
     clock = pygame.time.Clock()
     run = True
@@ -147,6 +164,8 @@ def main():
             # if user quits
             if event.type == pygame.QUIT:
                 run = False
+                # quit the game
+                pygame.quit()
             # if key is pressed down
             if event.type == pygame.KEYDOWN:
                 # if Left Control is pressed, also check for max bullets on screen
@@ -159,7 +178,21 @@ def main():
                     # spawn bullet at left position (x default since spawn is upper left)
                     bullet = pygame.Rect(red.x, red.y + red.height // 2 - 2, 10, 5)
                     red_bullets.append(bullet)
-        print(red_bullets, yellow_bullets)
+            # if red hit, remove health
+            if event.type == RED_HIT:
+                red_health -= 1
+            # if yellow hit, remove health
+            if event.type == YELLOW_HIT:
+                yellow_health -= 1
+        # set winning text and show if health is 0
+        winner_text = ""
+        if red_health <= 0:
+            winner_text = "Yellow wins!"
+        if yellow_health <= 0:
+            winner_text = "Red wins!"
+        if winner_text != "":
+            pass  # SOMEONE WON
+
         # determine which keys are being pressed down
         keys_pressed = pygame.key.get_pressed()
         # use the ship movement functions to move
@@ -169,10 +202,7 @@ def main():
         handle_bullets(yellow_bullets, red_bullets, yellow, red)
 
         # refresh the screen each loop & pass ship rectangles & bullets
-        draw_window(red, yellow, red_bullets, yellow_bullets)
-
-    # quit the game
-    pygame.quit()
+        draw_window(red, yellow, red_bullets, yellow_bullets, red_health, yellow_health)
 
 
 if __name__ == "__main__":
