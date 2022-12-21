@@ -9,6 +9,10 @@ pygame.display.set_caption("First Game")
 
 # define screen background constant
 WHITE = (255, 255, 255)
+# define border color
+BLACK = (0, 0, 0)
+# set a border in the middle of the screen to keep ships apart (use known width and height)
+BORDER = pygame.Rect(WIDTH/2 - 10, 0, 10, HEIGHT)
 
 # define FPS constant
 FPS = 60
@@ -30,6 +34,8 @@ RED_SPACESHIP_IMAGE = pygame.transform.rotate(pygame.transform.scale(RED_SPACESH
 def draw_window(red, yellow):
     # give white background
     WIN.fill(WHITE)
+    # draw middle black border on window (window, color, border)
+    pygame.draw.rect(WIN, BLACK, BORDER)
     # draw images (use values from red and yellow rectangles from main())
     WIN.blit(YELLOW_SPACESHIP_IMAGE, (yellow.x, yellow.y))
     WIN.blit(RED_SPACESHIP_IMAGE, (red.x, red.y))
@@ -38,26 +44,29 @@ def draw_window(red, yellow):
 
 # controls yellow ship movement
 def yellow_ship_movement(keys_pressed, yellow):
-    # if key is pressed, do something (WASD for 1P and arrows for 2P)
-    if keys_pressed[pygame.K_a]:  # 1p left
+    # if key is pressed, do something (WASD for 1P and arrows for 2P) - inline comments apply to red ship as well
+    # 1p left only allow movement to left border (0)
+    if keys_pressed[pygame.K_a] and yellow.x - VEL > 0:
         yellow.x -= VEL
-    if keys_pressed[pygame.K_d]:  # right
+    # right only up to border in middle of screen (including width of ship to prevent crossing border)
+    if keys_pressed[pygame.K_d] and yellow.x + VEL + yellow.width < BORDER.x:
         yellow.x += VEL
-    if keys_pressed[pygame.K_w]:  # up
+    # up only allow movement to top border (0)
+    if keys_pressed[pygame.K_w] and yellow.y - VEL > 0:
         yellow.y -= VEL
-    if keys_pressed[pygame.K_s]:  # down
+    # down only allow movement to right border
+    if keys_pressed[pygame.K_s] and yellow.y + VEL + yellow.height < HEIGHT:
         yellow.y += VEL
 
 
 def red_ship_movement(keys_pressed, red):
-    # if key is pressed, do something (WASD for 1P and arrows for 2P)
-    if keys_pressed[pygame.K_LEFT]:  # 2p left
+    if keys_pressed[pygame.K_LEFT] and red.x - VEL > BORDER.x + BORDER.width:  # 2p left
         red.x -= VEL
-    if keys_pressed[pygame.K_RIGHT]:  # right
+    if keys_pressed[pygame.K_RIGHT] and red.x + VEL + red.width < WIDTH:  # right
         red.x += VEL
-    if keys_pressed[pygame.K_UP]:  # up
+    if keys_pressed[pygame.K_UP] and red.y - VEL > 0:  # up
         red.y -= VEL
-    if keys_pressed[pygame.K_DOWN]:  # down
+    if keys_pressed[pygame.K_DOWN] and red.y + VEL + red.height < HEIGHT:  # down
         red.y += VEL
 
 
@@ -85,6 +94,7 @@ def main():
         # refresh the screen each loop & pass ship rectangles
         draw_window(red, yellow)
 
+    # quit the game
     pygame.quit()
 
 
